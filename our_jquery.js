@@ -52,10 +52,11 @@ var jQuery = function(param){
   //   }
 
   // }
-  return new jQueryObject(response);
+  return new jQueryObject(response, param);
 }
 
-function jQueryObject(collection){
+function jQueryObject(collection, param){
+  this.param = param 
 
   this.collection = collection;
   this.each = function(funct){
@@ -67,7 +68,7 @@ function jQueryObject(collection){
     return this.collection.length;
   };
   this.eq = function(index){
-    return new jQueryObject([this.collection[index]]);
+    return new jQueryObject([this.collection[index]], this.param);
   };
 
   this.idx = function(index){
@@ -90,12 +91,14 @@ function jQueryObject(collection){
     this.each(function(node){
       node.className += " " + className;
     });
+    return this
   };
 
   this.removeClass = function(className){
     this.each(function(node){
       node.classList.remove(className);
     });
+    return this
   };
 
   this.toggleClass = function(className){
@@ -125,9 +128,35 @@ function jQueryObject(collection){
       return this.collection[0].style[propName];
     } else {
       this.each(function(node){
-        node.style[propName] = value;
+        if(value[0] === "+"){
+          var adding = parseInt(value.slice(2))
+          var original = window.getComputedStyle(node)[propName]
+          var total = adding + parseInt(original.slice(0,original.length-2)) + "px"
+          if(original){
+            node.style[propName] = total
+          }
+          else{
+            node.style[propName] = adding + "px"
+          }
+        }
+        else if(value[0] === "-"){
+          var subtracting = parseInt(value.slice(2))
+          var original = window.getComputedStyle(node)[propName]
+          var total = parseInt(original.slice(0,original.length-2)) - subtracting + "px"
+          if(original){
+            node.style[propName] = total
+          }
+          else{
+            node.style[propName] = subtracting + "px"
+          }
+        }else{
+          node.style[propName] = value;
+        }
+
       });
     }
+   
+    return this
   };
 
   this.height = function(value){
@@ -169,6 +198,28 @@ function jQueryObject(collection){
     }
 
   };
+
+  this.children = function(){
+    var newParam = this.param + "> *"
+    console.log($(newParam))
+    return $(newParam)
+  }
+
+  this.append = function(value){
+    this.each(function(node){
+      node.innerHTML += value
+    })
+  };
+
+  this.replaceWith = function(value){
+    this.each(function(node){
+      node.outerHTML = value
+    })
+  };
+
+  this.filter = function(selector){
+    
+  }
 }
 
 var helper = {
@@ -186,6 +237,7 @@ var helper = {
 
   addClass: function(node, className){
       node.className += " " + className;
+      
   },
 
   removeClass: function(node, className){
@@ -198,24 +250,15 @@ var info_list_items = ["Make all sad classes into happy ones.",
 "Make the annoying popup link point instead to http://www.cashcats.biz.",
 "Change the positioning of the annoying popup so it is on the right side of the screen (it's okay to use direct CSS here). Make it 30 pixels lower than its current position by utilizing its current top value.",
 "Replace the ellipsis ... in one of the suggested topics with content of your choice -- but do so by traversing from a different element.",
-"Replace the form input with a \<textarea\> instead of a <input type=\"text\">."]
+"Replace the form input with a &lt; textarea &gt; instead of a &lt; input type=\"text\" &gt; ."]
 
   $('h1').html("Some thing cheeky.");
   $('.info-box').append('<ul id="info-ul">');
   info_list_items.forEach(function(list_item){
-    var li = $("<li>").html(list_item);
-    $('#info-ul').append(li);
+    $('#info-ul').append("<li>" + list_item + "</li>");
   });
   $('.sad').addClass("happy").removeClass("sad");
   $('#annoying-popup a').attr('href', "http://www.cashcats.biz.");
-  $('#annoying-popup').css({
-    right: 0,
-    top:"+=10"
-  });
-  $('.suggested-topics')
-    .children()
-    .filter('ul')
-    .children()
-    .filter(":contains(...)")
-    .html("what the heck!");
+  $('#annoying-popup').css("right", "0" ).css("top", "+=10")
+  $('.suggested-topics').children().eq(1).children().eq(6).html("This is a value")
   $('.input-form input[type=text]').replaceWith("<textarea>");
