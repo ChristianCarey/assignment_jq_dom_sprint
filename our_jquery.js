@@ -200,8 +200,7 @@ function jQueryObject(collection, param){
   };
 
   this.children = function(){
-    var newParam = this.param + "> *"
-    console.log($(newParam))
+    var newParam = this.param + " > *"
     return $(newParam)
   }
 
@@ -218,8 +217,20 @@ function jQueryObject(collection, param){
   };
 
   this.filter = function(selector){
-    
-  }
+    var newResponse = jQuery(selector),
+        mergedResponse = [];
+    this.each(function(node1){
+      newResponse.each(function(node2){
+        console.log(node1);
+        console.log(node2);
+        if (node1 == node2) {
+          mergedResponse.push(node1);
+        }
+      });
+    });
+    console.log(mergedResponse);
+    return new jQueryObject(mergedResponse, selector);
+  };
 }
 
 var helper = {
@@ -260,5 +271,11 @@ var info_list_items = ["Make all sad classes into happy ones.",
   $('.sad').addClass("happy").removeClass("sad");
   $('#annoying-popup a').attr('href', "http://www.cashcats.biz.");
   $('#annoying-popup').css("right", "0" ).css("top", "+=10")
-  $('.suggested-topics').children().eq(1).children().eq(6).html("This is a value")
+  // $('.suggested-topics').children().eq(1).children().eq(6).html("This is a value")
+  console.log($('.suggested-topics')
+    .children()
+    .filter('ul'))
+    // .children())
+    // .eq(6)
+    // .html("what the heck!");
   $('.input-form input[type=text]').replaceWith("<textarea>");
